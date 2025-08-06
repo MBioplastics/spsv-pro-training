@@ -1,0 +1,66 @@
+name: Build Android APK/AAB for Google Play Store
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build web app
+      run: npm run build
+    
+    - name: Sync Capacitor
+      run: npx cap sync android
+    
+    - name: Create keystore directory
+      run: mkdir -p android/app/keystore
+    
+    - name: Generate keystore
+      run: |
+        keytool -genkey -v -keystore android/app/keystore/spsv-pro-training.keystore \
+        -alias spsv-pro-training -keyalg RSA -keysize 2048 -validity 10000 \
+        -dname "CN=SPSV Pro Training, OU=Development, O=SPSV Pro Training, L=Dublin, ST=Dublin, C=IE" \
+        -storepass spsvtraining2024 -keypass spsvtraining2024
+    
+    - name: Build Android APK
+      run: |
+        cd android
+        ./gradlew assembleRelease
+    
+    - name: Build Android AAB
+      run: |
+        cd android
+        ./gradlew bundleRelease
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: android/app/build/outputs/apk/release/app-release.apk
+    
+    - name: Upload AAB
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-aab
+        path: android/app/build/outputs/bundle/release/app-release.aab

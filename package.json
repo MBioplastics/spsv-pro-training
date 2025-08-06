@@ -1,0 +1,19 @@
+{
+  "name": "spsv-pro-training",
+  "version": "1.0.0",
+  "description": "Irish SPSV Professional Driver Training Platform",
+  "main": "server/index.ts",
+  "scripts": {
+    "dev": "NODE_ENV=development tsx server/index.ts",
+    "build": "tsc && vite build",
+    "android:build": "npm run build && npx cap sync android && cd android && ./gradlew assembleRelease && ./gradlew bundleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite": "^5.0.0"
+  }
+}
